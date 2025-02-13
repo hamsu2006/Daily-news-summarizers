@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily News Summarizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #2E3192, #1BFFFF);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+            margin-bottom: 15px;
+        }
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">📰 Daily News Summarizer</h1>
+        <textarea id="inputText" placeholder="Paste article text or enter URL..."></textarea>
+        <button class="btn" onclick="summarizeArticle()">✨ Summarize</button>
+        <div class="buttons-container">
+            <button class="btn" onclick="showSummary()">📜 Summary</button>
+            <button class="btn" onclick="showEvaluation()">📊 Evaluation</button>
+            <button class="btn" onclick="showOriginal()">📰 Original Article</button>
+        </div>
+        <div id="output" class="mt-4"></div>
+    </div>
+
+    <!-- JavaScript Code Goes Here -->
+    <script>
+        function summarizeArticle() {
+            const inputText = document.getElementById("inputText").value.trim();
+            
+            if (!inputText) {
+                alert("Please enter some text or a URL to summarize.");
+                return;
+            }
+            
+            document.getElementById("output").innerText = "Summarizing...";
+            
+            // Prepare the data to send to the backend
+            const data = {
+                input_text_or_url: inputText
+            };
+
+            // Send the request to the backend using fetch API
+            fetch('http://127.0.0.1:5000/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)  // sending the data as JSON
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.summary) {
+                    document.getElementById("output").innerHTML = `
+                        <h2>Summary:</h2>
+                        <p>${data.summary}</p>
+                        <h2>Evaluation:</h2>
+                        <pre>${JSON.stringify(data.evaluation, null, 2)}</pre>
+                        <h2>Original Article:</h2>
+                        <p>${data.original_text}</p>
+                        <audio controls>
+                            <source src="${data.audio_url}" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    `;
+                } else {
+                    document.getElementById("output").innerText = "An error occurred: " + data.error;
+                }
+            })
+            .catch(error => {
+                document.getElementById("output").innerText = "Error: " + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

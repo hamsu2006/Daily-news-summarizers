@@ -15,7 +15,7 @@ summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)  # Enable CORS for all routes 
 
 def get_article_from_url(url):
     """Fetches and extracts text from a given URL."""
